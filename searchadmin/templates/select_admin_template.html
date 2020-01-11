@@ -1,5 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% load i18n admin_urls static admin_list %}
+{% load replace %}
 
 {% block extrastyle %}
 {{ block.super }}
@@ -75,9 +76,11 @@
           <select name='field' style="height: 30px;margin: 0px 2px 2px 3px;">
             {% for field in cl.search_fields %}
             {% if field == select_field %}
-            <option value="{{field}}" selected>{{field}}</option>
+            <option value="{{field}}" selected>
+              {% replace search="__exact" replacement="(精确)" %}{{field}}{% endreplace %}</option>
             {% else %}
-            <option value="{{field}}">{{field}}</option>
+            <option value="{{field}}"> {% replace search="__exact" replacement="(精确)" %}{{field}}{% endreplace %}
+            </option>
             {% endif %}
             {% endfor %}
             <option value='all'>所有</option>
