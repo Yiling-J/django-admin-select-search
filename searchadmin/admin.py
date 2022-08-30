@@ -11,6 +11,7 @@ from django.contrib.admin.utils import (
     get_deleted_objects, lookup_needs_distinct, model_format_dict,
     model_ngettext, quote, unquote,
 )
+from django.contrib.admin.views.main import SEARCH_VAR
 import operator
 
 
@@ -24,7 +25,9 @@ class SelectModelAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = {
-            'select_field': request.GET['field'] if 'field' in request.GET else 'all'}
+            'select_field': request.GET['field'] if 'field' in request.GET else 'all',
+            'search_var': SEARCH_VAR
+        }
         return admin.ModelAdmin.changelist_view(self, request, extra_context)
 
     class FieldFilter(admin.SimpleListFilter):
@@ -38,7 +41,6 @@ class SelectModelAdmin(admin.ModelAdmin):
             return queryset.all()
 
     def get_search_results(self, request, queryset, search_term):
-        print("search_term:", search_term)
         queryset, use_distinct = super(SelectModelAdmin, self).get_search_results(
             request, queryset, search_term)
         field = request.GET['field'] if 'field' in request.GET else 'all'
@@ -76,16 +78,6 @@ class SelectModelAdmin(admin.ModelAdmin):
             # Otherwise, use the field with icontains.
             return "%s__icontains" % field_name
 
-        # use_distinct = False
-        # search_fields = self.get_search_fields(request)
-        # if search_fields and search_term:
-        #     orm_lookups = [construct_search(str(search_field))
-        #                    for search_field in search_fields]
-        #     for bit in search_term.split():
-        #         or_queries = [models.Q(**{orm_lookup: bit})
-        #                       for orm_lookup in orm_lookups]
-        #         queryset = queryset.filter(reduce(operator.or_, or_queries))
-        #     use_distinct |= any(lookup_needs_distinct(self.opts, search_spec) for search_spec in orm_lookups)
         if field == 'all':
             return queryset, use_distinct
         else:
